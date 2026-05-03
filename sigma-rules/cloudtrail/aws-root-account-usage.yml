@@ -1,0 +1,37 @@
+title: AWS Root Account Usage
+id: 6f252981-2e7c-4a67-b8b2-a35ad6f3e0d1
+status: stable
+level: critical
+description: |
+    Detects any usage of the AWS root account. The root account should only
+    be used for initial setup and emergency break-glass scenarios. Any other
+    usage is a security concern and potential indicator of compromise.
+author: Shakil Md. Rezwanul Bari
+date: 2024/01/15
+modified: 2024/06/01
+references:
+    - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+    - https://d1.awsstatic.com/whitepapers/compliance/AWS_CIS_Foundations_Benchmark.pdf
+    - https://attack.mitre.org/techniques/T1078/004/
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        userIdentity.type: Root
+    filter_automated:
+        userIdentity.invokedBy:
+            - 'AWS Internal'
+            - '*.amazonaws.com'
+    filter_service_event:
+        eventType: AwsServiceEvent
+    condition: selection and not filter_automated and not filter_service_event
+falsepositives:
+    - Emergency break-glass access (should be rare and documented)
+    - Initial account setup tasks
+    - Root-only operations (account-level settings changes)
+tags:
+    - attack.initial_access
+    - attack.privilege_escalation
+    - attack.t1078.004
+    - cis.aws.1.1
