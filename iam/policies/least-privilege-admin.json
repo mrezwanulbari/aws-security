@@ -1,0 +1,73 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowLimitedAdminAccess",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:Describe*",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:RebootInstances",
+                "s3:ListAllMyBuckets",
+                "s3:GetBucketLocation",
+                "s3:GetBucketPolicy",
+                "s3:GetObject",
+                "s3:PutObject",
+                "rds:Describe*",
+                "cloudwatch:Describe*",
+                "cloudwatch:Get*",
+                "cloudwatch:List*",
+                "logs:Describe*",
+                "logs:Get*",
+                "logs:FilterLogEvents",
+                "iam:GetAccountSummary",
+                "iam:ListUsers",
+                "iam:ListRoles",
+                "iam:GetUser",
+                "iam:GetRole"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "Bool": {
+                    "aws:MultiFactorAuthPresent": "true"
+                }
+            }
+        },
+        {
+            "Sid": "DenyDestructiveActions",
+            "Effect": "Deny",
+            "Action": [
+                "organizations:LeaveOrganization",
+                "iam:CreateUser",
+                "iam:DeleteUser",
+                "iam:CreateAccessKey",
+                "cloudtrail:StopLogging",
+                "cloudtrail:DeleteTrail",
+                "config:StopConfigurationRecorder",
+                "config:DeleteConfigurationRecorder",
+                "guardduty:DeleteDetector",
+                "guardduty:DisassociateFromMasterAccount"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyWithoutMFA",
+            "Effect": "Deny",
+            "NotAction": [
+                "iam:CreateVirtualMFADevice",
+                "iam:EnableMFADevice",
+                "iam:ListMFADevices",
+                "iam:GetUser",
+                "iam:ChangePassword",
+                "sts:GetSessionToken"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "BoolIfExists": {
+                    "aws:MultiFactorAuthPresent": "false"
+                }
+            }
+        }
+    ]
+}
