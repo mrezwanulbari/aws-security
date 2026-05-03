@@ -1,0 +1,30 @@
+title: AWS S3 Bucket Public Access Configuration Changed
+id: c3d4e5f6-a7b8-9012-cdef-123456789012
+status: stable
+level: high
+description: |
+    Detects changes to S3 bucket policies or ACLs that could make
+    bucket contents publicly accessible. Public S3 buckets are one of
+    the most common causes of cloud data breaches.
+author: Shakil Md. Rezwanul Bari
+date: 2024/01/15
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection_policy:
+        eventName:
+            - PutBucketPolicy
+            - PutBucketAcl
+            - PutBucketPublicAccessBlock
+            - DeleteBucketPublicAccessBlock
+    selection_block_removed:
+        eventName: DeleteBucketPublicAccessBlock
+    condition: selection_policy or selection_block_removed
+falsepositives:
+    - Authorized static website hosting configurations
+    - Public dataset publishing (should be documented)
+tags:
+    - attack.exfiltration
+    - attack.t1537
+    - cis.aws.2.6
