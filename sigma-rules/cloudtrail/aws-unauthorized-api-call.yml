@@ -1,0 +1,32 @@
+title: AWS Unauthorized API Call (AccessDenied)
+id: d4e5f6a7-b8c9-0123-def0-234567890123
+status: stable
+level: medium
+description: |
+    Detects API calls that return AccessDenied or UnauthorizedAccess errors.
+    High volumes of these errors may indicate credential stuffing, privilege
+    escalation attempts, or lateral movement.
+author: Shakil Md. Rezwanul Bari
+date: 2024/01/15
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        errorCode:
+            - AccessDenied
+            - UnauthorizedAccess
+            - Client.UnauthorizedAccess
+    condition: selection
+    timeframe: 5m
+    count:
+        field: userIdentity.arn
+        condition: '>= 10'
+falsepositives:
+    - Misconfigured IAM policies (common during development)
+    - Service role permission gaps
+tags:
+    - attack.discovery
+    - attack.t1580
+    - attack.privilege_escalation
+    - attack.t1078
