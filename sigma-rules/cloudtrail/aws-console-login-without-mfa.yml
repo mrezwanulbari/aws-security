@@ -1,0 +1,32 @@
+title: AWS Console Login Without MFA
+id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+status: stable
+level: high
+description: |
+    Detects AWS Management Console logins that were performed without
+    multi-factor authentication. This violates security best practices
+    and may indicate compromised credentials.
+author: Shakil Md. Rezwanul Bari
+date: 2024/01/15
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: ConsoleLogin
+        responseElements.ConsoleLogin: Success
+    filter_no_mfa:
+        additionalEventData.MFAUsed: 'No'
+    filter_saml:
+        userIdentity.type: SAMLUser
+    filter_sso:
+        userIdentity.type: AssumedRole
+    condition: selection and filter_no_mfa and not filter_saml and not filter_sso
+falsepositives:
+    - Service accounts with console access (should be eliminated)
+    - SSO-federated users (MFA handled by IdP)
+tags:
+    - attack.initial_access
+    - attack.defense_evasion
+    - attack.t1078
+    - cis.aws.1.10
