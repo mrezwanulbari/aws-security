@@ -1,0 +1,32 @@
+title: AWS Security Group Modified to Allow Unrestricted Access
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+status: stable
+level: high
+description: |
+    Detects modifications to EC2 security groups that introduce overly
+    permissive rules (0.0.0.0/0 or ::/0), which could expose services
+    to the internet unintentionally.
+author: Shakil Md. Rezwanul Bari
+date: 2024/01/15
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName:
+            - AuthorizeSecurityGroupIngress
+            - AuthorizeSecurityGroupEgress
+            - ModifySecurityGroupRules
+    filter_open:
+        requestParameters.ipPermissions.items.ipRanges.items.cidrIp: '0.0.0.0/0'
+    filter_open_ipv6:
+        requestParameters.ipPermissions.items.ipv6Ranges.items.cidrIpv6: '::/0'
+    condition: selection and (filter_open or filter_open_ipv6)
+falsepositives:
+    - Authorized public-facing load balancers or web servers
+    - CDN or WAF configurations that require public access
+tags:
+    - attack.persistence
+    - attack.t1098
+    - attack.t1562.007
+    - cis.aws.4.1
