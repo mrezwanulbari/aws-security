@@ -1,0 +1,33 @@
+title: AWS CloudTrail Logging Disabled or Modified
+id: d4e3c2b1-a098-7654-3210-fedcba987654
+status: stable
+level: critical
+description: |
+    Detects when CloudTrail logging is stopped, deleted, or its configuration
+    is modified in a way that could reduce visibility. This is a common
+    defense evasion technique used by attackers after gaining access.
+author: Shakil Md. Rezwanul Bari
+date: 2024/01/15
+modified: 2024/06/01
+references:
+    - https://attack.mitre.org/techniques/T1562/008/
+    - https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-delete-trail.html
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection_disable:
+        eventName:
+            - StopLogging
+            - DeleteTrail
+    selection_modify:
+        eventName: UpdateTrail
+        requestParameters.isMultiRegionTrail: false
+    condition: selection_disable or selection_modify
+falsepositives:
+    - Authorized trail reconfiguration during maintenance windows
+    - Trail consolidation during account migration
+tags:
+    - attack.defense_evasion
+    - attack.t1562.008
+    - cis.aws.2.1
